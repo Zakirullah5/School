@@ -17,7 +17,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import DashboardShell, { type NavItem } from './DashboardShell';
-import { apiFetch } from '../lib/api';
+import { apiFetch, resolveAssetUrl } from '../lib/api';
 import type { NotificationItem, PktTimeInfo, SessionUser, StudentFullProfile } from '../types';
 
 interface ParentDashboardProps {
@@ -118,7 +118,7 @@ export default function ParentDashboard({
               <div className="bg-[#0B1B3A] text-white rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <img
-                    src={st.photo_url || '/src/assets/images/avatar_student_male_1795627463854.jpg'}
+                    src={resolveAssetUrl(st.photo_url)}
                     alt={st.full_name}
                     referrerPolicy="no-referrer"
                     className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400 shrink-0"

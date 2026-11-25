@@ -32,7 +32,7 @@ import {
 } from 'recharts';
 import DashboardShell, { type NavItem } from './DashboardShell';
 import StudentProfileModal from './StudentProfileModal';
-import { apiFetch, getAuthToken } from '../lib/api';
+import { apiFetch, getAuthToken, isStaticMode } from '../lib/api';
 import { exportAnalyticsReportPdf, exportAttendanceExcel, exportAttendancePdf } from '../lib/exports';
 import type { NotificationItem, PktTimeInfo, SessionUser, StudentFullProfile } from '../types';
 
@@ -1634,8 +1634,21 @@ export default function PrincipalDashboard({
                 type="button"
                 onClick={async () => {
                   try {
+                    if (isStaticMode()) {
+                      const snapshot = await apiFetch('/api/principal/backup');
+                      const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `abdali-academy-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                      return;
+                    }
                     const token = getAuthToken();
-                    const res = await fetch('/api/principal/backup', {
+                    const res = await fetch('./api/principal/backup', {
                       credentials: 'include',
                       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                     });

@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import type { StudentFullProfile } from '../types';
 import { exportStudentIdCardPdf } from '../lib/exports';
+import { resolveAssetUrl } from '../lib/api';
 
 interface StudentProfileModalProps {
   profile: StudentFullProfile | null;
@@ -31,7 +32,7 @@ export default function StudentProfileModal({ profile, loading, onClose }: Stude
           <div className="flex items-center gap-4 min-w-0">
             {profile && (
               <img
-                src={profile.student.photo_url || '/src/assets/images/avatar_student_male_1795627463854.jpg'}
+                src={resolveAssetUrl(profile.student.photo_url)}
                 alt={profile.student.full_name}
                 referrerPolicy="no-referrer"
                 className="w-14 h-14 rounded-xl object-cover border-2 border-amber-400 shrink-0"

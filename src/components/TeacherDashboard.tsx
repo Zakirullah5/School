@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import DashboardShell, { type NavItem } from './DashboardShell';
 import StudentProfileModal from './StudentProfileModal';
-import { apiFetch, uploadFile } from '../lib/api';
+import { apiFetch, resolveAssetUrl, uploadFile } from '../lib/api';
 import type { NotificationItem, PktTimeInfo, SessionUser, StudentFullProfile } from '../types';
 
 interface TeacherDashboardProps {
@@ -773,7 +773,7 @@ export default function TeacherDashboard({
                     className="w-14 h-14 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 cursor-pointer"
                   >
                     <img
-                      src={s.photo_url || '/src/assets/images/avatar_student_male_1795627463854.jpg'}
+                      src={resolveAssetUrl(s.photo_url)}
                       alt={s.full_name}
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover"
@@ -858,7 +858,7 @@ export default function TeacherDashboard({
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="w-6 text-sm font-mono font-bold text-amber-600">#{r.rank}</span>
                         <img
-                          src={r.photo_url || '/src/assets/images/avatar_student_male_1795627463854.jpg'}
+                          src={resolveAssetUrl(r.photo_url)}
                           alt={r.full_name}
                           referrerPolicy="no-referrer"
                           className="w-9 h-9 rounded-full object-cover shrink-0"
@@ -899,7 +899,7 @@ export default function TeacherDashboard({
                           #{r.rank}
                         </span>
                         <img
-                          src={r.photo_url || '/src/assets/images/avatar_student_male_1795627463854.jpg'}
+                          src={resolveAssetUrl(r.photo_url)}
                           alt={r.full_name}
                           referrerPolicy="no-referrer"
                           className="w-9 h-9 rounded-full object-cover shrink-0"

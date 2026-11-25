@@ -183,7 +183,7 @@ export default function WelcomePage({
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-white border border-amber-400/50 shrink-0 flex items-center justify-center">
                     {!crestFailed ? (
                       <img
-                        src="/src/assets/images/academy_crest_emblem_1795627463223.jpg"
+                        src="./src/assets/images/academy_crest_emblem_1795627463223.jpg"
                         alt="Abdali Education Academy Crest"
                         referrerPolicy="no-referrer"
                         onError={() => setCrestFailed(true)}
@@ -260,7 +260,7 @@ export default function WelcomePage({
           >
             {!heroImgFailed ? (
               <img
-                src="/src/assets/images/academy_campus_hero_1795627464044.jpg"
+                src="./src/assets/images/academy_campus_hero_1795627464044.jpg"
                 alt="Abdali Education Academy Campus"
                 referrerPolicy="no-referrer"
                 onError={() => setHeroImgFailed(true)}

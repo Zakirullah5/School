@@ -13,7 +13,7 @@ import {
   ShieldAlert,
   Menu,
 } from 'lucide-react';
-import { apiFetch } from '../lib/api';
+import { apiFetch, resolveAssetUrl } from '../lib/api';
 import type { NotificationItem, PktTimeInfo, SessionUser } from '../types';
 
 export interface NavItem {
@@ -134,7 +134,7 @@ export default function DashboardShell({
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 bg-[#0B1B3A] text-white border-r border-[#162C56] no-print">
         <div className="p-5 border-b border-white/10 flex items-center gap-3">
           <img
-            src="/src/assets/images/academy_crest_emblem_1795627463223.jpg"
+            src="./src/assets/images/academy_crest_emblem_1795627463223.jpg"
             alt="Abdali Crest"
             referrerPolicy="no-referrer"
             className="w-10 h-10 rounded-lg object-cover bg-white shrink-0"
@@ -183,7 +183,7 @@ export default function DashboardShell({
         <div className="p-4 border-t border-white/10 space-y-2">
           <div className="flex items-center gap-3 px-1">
             <img
-              src={user.avatarUrl || '/src/assets/images/avatar_teacher_portrait_1795627465105.jpg'}
+              src={resolveAssetUrl(user.avatarUrl, './src/assets/images/avatar_teacher_portrait_1795627465105.jpg')}
               alt={user.fullName}
               referrerPolicy="no-referrer"
               className="w-9 h-9 rounded-full object-cover border border-white/20 shrink-0"

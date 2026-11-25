@@ -25,7 +25,7 @@ export function triggerBrowserPushNotification(title: string, body: string): voi
     try {
       new Notification(title, {
         body,
-        icon: '/src/assets/images/academy_crest_emblem_1795627463223.jpg',
+        icon: './src/assets/images/academy_crest_emblem_1795627463223.jpg',
       });
     } catch {
       // Ignore environments blocking Notification constructor

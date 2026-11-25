@@ -4,7 +4,8 @@ import PrincipalDashboard from './components/PrincipalDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import ParentDashboard from './components/ParentDashboard';
-import { apiFetch, getAuthToken, setAuthToken } from './lib/api';
+import { apiFetch, getAuthToken, isStaticMode, setAuthToken } from './lib/api';
+import { subscribeStaticEvents } from './lib/staticBackend';
 import { playNotificationChime, triggerBrowserPushNotification } from './lib/sound';
 import type { NotificationItem, PktTimeInfo, SessionUser } from './types';
 
@@ -63,7 +64,7 @@ export default function App() {
     };
   }, [fetchNotifications]);
 
-  // Periodically resync server PKT clock every 30s
+  // Periodically resync PKT clock every 30s
   useEffect(() => {
     const id = window.setInterval(async () => {
       try {
@@ -76,7 +77,7 @@ export default function App() {
     return () => window.clearInterval(id);
   }, []);
 
-  // Real-time WebSocket connection when authenticated
+  // Real-time WebSocket connection (live server) or static event bus (GitHub Pages)
   useEffect(() => {
     if (!user) {
       if (wsRef.current) {
@@ -84,6 +85,30 @@ export default function App() {
         wsRef.current = null;
       }
       return;
+    }
+
+    const handleRealtimeMessage = (event: string, payload: unknown) => {
+      if (event === 'notification:new' && payload) {
+        const incoming = payload as NotificationItem;
+        setNotifications((prev) => {
+          if (prev.some((p) => p.id === incoming.id)) return prev;
+          return [incoming, ...prev];
+        });
+        setToast(incoming);
+        setLiveSignal((s) => s + 1);
+        if (userRef.current?.soundAlerts !== false) {
+          playNotificationChime();
+        }
+        if (userRef.current?.pushEnabled) {
+          triggerBrowserPushNotification(incoming.title, incoming.message);
+        }
+      } else if (event === 'attendance:updated') {
+        setLiveSignal((s) => s + 1);
+      }
+    };
+
+    if (isStaticMode()) {
+      return subscribeStaticEvents(handleRealtimeMessage);
     }
 
     let closed = false;
@@ -100,23 +125,7 @@ export default function App() {
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
-          if (msg.event === 'notification:new' && msg.payload) {
-            const incoming = msg.payload as NotificationItem;
-            setNotifications((prev) => {
-              if (prev.some((p) => p.id === incoming.id)) return prev;
-              return [incoming, ...prev];
-            });
-            setToast(incoming);
-            setLiveSignal((s) => s + 1);
-            if (userRef.current?.soundAlerts !== false) {
-              playNotificationChime();
-            }
-            if (userRef.current?.pushEnabled) {
-              triggerBrowserPushNotification(incoming.title, incoming.message);
-            }
-          } else if (msg.event === 'attendance:updated') {
-            setLiveSignal((s) => s + 1);
-          }
+          handleRealtimeMessage(msg.event, msg.payload);
         } catch {
           // Ignore malformed WS message
         }

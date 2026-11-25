@@ -1,0 +1,6 @@
+{
+  "name": "Abdali Education Academy",
+  "description": "Smart School Management System for Abdali Education Academy featuring Principal, Teacher, Student, and Parent portals, PKT-enforced attendance, analytics, and real-time notifications.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

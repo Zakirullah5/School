@@ -454,15 +454,52 @@ function createInitialStaticDB(): StaticDB {
 }
 
 function openIDB(): Promise<IDBDatabase> {
+  if (typeof indexedDB === 'undefined') {
+    return Promise.reject(new Error('IndexedDB unavailable'));
+  }
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = () => {
-      if (!req.result.objectStoreNames.contains(IDB_STORE)) {
-        req.result.createObjectStore(IDB_STORE);
+    let settled = false;
+    const timer = window.setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error('IndexedDB open timeout'));
       }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    }, 1500);
+    try {
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = () => {
+        if (!req.result.objectStoreNames.contains(IDB_STORE)) {
+          req.result.createObjectStore(IDB_STORE);
+        }
+      };
+      req.onsuccess = () => {
+        if (!settled) {
+          settled = true;
+          window.clearTimeout(timer);
+          resolve(req.result);
+        }
+      };
+      req.onerror = () => {
+        if (!settled) {
+          settled = true;
+          window.clearTimeout(timer);
+          reject(req.error);
+        }
+      };
+      req.onblocked = () => {
+        if (!settled) {
+          settled = true;
+          window.clearTimeout(timer);
+          reject(new Error('IndexedDB blocked'));
+        }
+      };
+    } catch (err) {
+      if (!settled) {
+        settled = true;
+        window.clearTimeout(timer);
+        reject(err);
+      }
+    }
   });
 }
 

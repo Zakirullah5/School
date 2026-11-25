@@ -24,27 +24,42 @@ export function resolveAssetUrl(url: string | null | undefined, fallback?: strin
   return chosen;
 }
 
+let detectPromise: Promise<'live' | 'static'> | null = null;
+
 async function detectBackendMode(): Promise<'live' | 'static'> {
   if (backendMode !== 'unknown') return backendMode;
-  if (typeof window !== 'undefined' && window.location.hostname.endsWith('github.io')) {
+  if (detectPromise) return detectPromise;
+
+  detectPromise = (async () => {
+    if (typeof window !== 'undefined' && window.location.hostname.endsWith('github.io')) {
+      backendMode = 'static';
+      return 'static';
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 3500);
+    try {
+      const res = await fetch('./api/health', {
+        credentials: 'include',
+        signal: controller.signal,
+      });
+      const ct = res.headers.get('content-type') || '';
+      if (res.ok && ct.includes('application/json')) {
+        const data = await res.json();
+        if (data && data.ok === true) {
+          backendMode = 'live';
+          return 'live';
+        }
+      }
+    } catch {
+      // Fall through to static
+    } finally {
+      window.clearTimeout(timer);
+    }
     backendMode = 'static';
     return 'static';
-  }
-  try {
-    const res = await fetch('./api/health', { credentials: 'include' });
-    const ct = res.headers.get('content-type') || '';
-    if (res.ok && ct.includes('application/json')) {
-      const data = await res.json();
-      if (data && data.ok === true) {
-        backendMode = 'live';
-        return 'live';
-      }
-    }
-  } catch {
-    // Fall through to static
-  }
-  backendMode = 'static';
-  return 'static';
+  })();
+
+  return detectPromise;
 }
 
 export async function apiFetch<T = any>(url: string, options: RequestInit = {}): Promise<T> {

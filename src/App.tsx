@@ -1,13 +1,14 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { lazy, Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import WelcomePage from './components/WelcomePage';
-import PrincipalDashboard from './components/PrincipalDashboard';
-import TeacherDashboard from './components/TeacherDashboard';
-import StudentDashboard from './components/StudentDashboard';
-import ParentDashboard from './components/ParentDashboard';
 import { apiFetch, getAuthToken, isStaticMode, setAuthToken } from './lib/api';
 import { subscribeStaticEvents } from './lib/staticBackend';
 import { playNotificationChime, triggerBrowserPushNotification } from './lib/sound';
 import type { NotificationItem, PktTimeInfo, SessionUser } from './types';
+
+const PrincipalDashboard = lazy(() => import('./components/PrincipalDashboard'));
+const TeacherDashboard = lazy(() => import('./components/TeacherDashboard'));
+const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
+const ParentDashboard = lazy(() => import('./components/ParentDashboard'));
 
 export default function App() {
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -178,62 +179,70 @@ export default function App() {
 
   return (
     <>
-      {!user ? (
-        <WelcomePage
-          onLoginSuccess={handleLoginSuccess}
-          darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode((d) => !d)}
-          pktTimeStr={pkt ? `${pkt.date} ${pkt.time}` : undefined}
-        />
-      ) : user.role === 'principal' ? (
-        <PrincipalDashboard
-          user={user}
-          pkt={pkt}
-          notifications={notifications}
-          onRefreshNotifications={fetchNotifications}
-          onLogout={handleLogout}
-          onPasswordChanged={handlePasswordChanged}
-          darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode((d) => !d)}
-          liveSignal={liveSignal}
-        />
-      ) : user.role === 'teacher' ? (
-        <TeacherDashboard
-          user={user}
-          pkt={pkt}
-          notifications={notifications}
-          onRefreshNotifications={fetchNotifications}
-          onLogout={handleLogout}
-          onPasswordChanged={handlePasswordChanged}
-          darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode((d) => !d)}
-          liveSignal={liveSignal}
-        />
-      ) : user.role === 'student' ? (
-        <StudentDashboard
-          user={user}
-          pkt={pkt}
-          notifications={notifications}
-          onRefreshNotifications={fetchNotifications}
-          onLogout={handleLogout}
-          onPasswordChanged={handlePasswordChanged}
-          darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode((d) => !d)}
-          liveSignal={liveSignal}
-        />
-      ) : (
-        <ParentDashboard
-          user={user}
-          pkt={pkt}
-          notifications={notifications}
-          onRefreshNotifications={fetchNotifications}
-          onLogout={handleLogout}
-          onPasswordChanged={handlePasswordChanged}
-          darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode((d) => !d)}
-          liveSignal={liveSignal}
-        />
-      )}
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center text-sm text-slate-600 dark:text-slate-300">
+            Loading Abdali Education Academy Portal...
+          </div>
+        }
+      >
+        {!user ? (
+          <WelcomePage
+            onLoginSuccess={handleLoginSuccess}
+            darkMode={darkMode}
+            onToggleDarkMode={() => setDarkMode((d) => !d)}
+            pktTimeStr={pkt ? `${pkt.date} ${pkt.time}` : undefined}
+          />
+        ) : user.role === 'principal' ? (
+          <PrincipalDashboard
+            user={user}
+            pkt={pkt}
+            notifications={notifications}
+            onRefreshNotifications={fetchNotifications}
+            onLogout={handleLogout}
+            onPasswordChanged={handlePasswordChanged}
+            darkMode={darkMode}
+            onToggleDarkMode={() => setDarkMode((d) => !d)}
+            liveSignal={liveSignal}
+          />
+        ) : user.role === 'teacher' ? (
+          <TeacherDashboard
+            user={user}
+            pkt={pkt}
+            notifications={notifications}
+            onRefreshNotifications={fetchNotifications}
+            onLogout={handleLogout}
+            onPasswordChanged={handlePasswordChanged}
+            darkMode={darkMode}
+            onToggleDarkMode={() => setDarkMode((d) => !d)}
+            liveSignal={liveSignal}
+          />
+        ) : user.role === 'student' ? (
+          <StudentDashboard
+            user={user}
+            pkt={pkt}
+            notifications={notifications}
+            onRefreshNotifications={fetchNotifications}
+            onLogout={handleLogout}
+            onPasswordChanged={handlePasswordChanged}
+            darkMode={darkMode}
+            onToggleDarkMode={() => setDarkMode((d) => !d)}
+            liveSignal={liveSignal}
+          />
+        ) : (
+          <ParentDashboard
+            user={user}
+            pkt={pkt}
+            notifications={notifications}
+            onRefreshNotifications={fetchNotifications}
+            onLogout={handleLogout}
+            onPasswordChanged={handlePasswordChanged}
+            darkMode={darkMode}
+            onToggleDarkMode={() => setDarkMode((d) => !d)}
+            liveSignal={liveSignal}
+          />
+        )}
+      </Suspense>
 
       {/* Real-Time Notification Toast */}
       {toast && (

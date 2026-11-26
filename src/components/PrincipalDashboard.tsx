@@ -32,7 +32,7 @@ import {
 } from 'recharts';
 import DashboardShell, { type NavItem } from './DashboardShell';
 import StudentProfileModal from './StudentProfileModal';
-import { apiFetch, getAuthToken, isStaticMode } from '../lib/api';
+import { apiFetch, getAuthToken, isFirebaseMode, isStaticMode } from '../lib/api';
 import { exportAnalyticsReportPdf, exportAttendanceExcel, exportAttendancePdf } from '../lib/exports';
 import type { NotificationItem, PktTimeInfo, SessionUser, StudentFullProfile } from '../types';
 
@@ -1634,7 +1634,7 @@ export default function PrincipalDashboard({
                 type="button"
                 onClick={async () => {
                   try {
-                    if (isStaticMode()) {
+                    if (isStaticMode() || isFirebaseMode()) {
                       const snapshot = await apiFetch('/api/principal/backup');
                       const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
                       const url = URL.createObjectURL(blob);

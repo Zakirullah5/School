@@ -1,0 +1,558 @@
+{
+  "entities": {
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized Principal/Administrator UID registry.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "maxLength": 160 },
+        "fullName": { "type": "string", "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "fullName", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Role-based user profile without sensitive PII.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "role": { "type": "string", "enum": ["principal", "teacher", "student", "parent", "pending"] },
+        "fullName": { "type": "string", "maxLength": 120 },
+        "code": { "type": "string", "maxLength": 40 },
+        "assignedClassId": { "type": "string", "maxLength": 128 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "isActive": { "type": "boolean" },
+        "soundAlerts": { "type": "boolean" },
+        "pushEnabled": { "type": "boolean" },
+        "avatarUrl": { "type": "string", "maxLength": 50000 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "role", "fullName", "isActive", "createdAt"]
+    },
+    "UserPrivate": {
+      "title": "UserPrivate",
+      "description": "Isolated PII for a user (email, phone).",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "maxLength": 160 },
+        "phone": { "type": "string", "maxLength": 40 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "EmailRoleInvite": {
+      "title": "EmailRoleInvite",
+      "description": "Principal-issued email-to-role pre-authorization mapping.",
+      "type": "object",
+      "properties": {
+        "emailLower": { "type": "string", "maxLength": 160 },
+        "role": { "type": "string", "enum": ["principal", "teacher", "student", "parent"] },
+        "fullName": { "type": "string", "maxLength": 120 },
+        "code": { "type": "string", "maxLength": 40 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "assignedClassId": { "type": "string", "maxLength": 128 },
+        "createdByUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["emailLower", "role", "fullName", "createdByUid", "createdAt"]
+    },
+    "AcademicClass": {
+      "title": "AcademicClass",
+      "description": "School class/section managed by Principal and assigned teacher.",
+      "type": "object",
+      "properties": {
+        "classCode": { "type": "string", "maxLength": 32 },
+        "name": { "type": "string", "maxLength": 64 },
+        "section": { "type": "string", "maxLength": 16 },
+        "roomNumber": { "type": "string", "maxLength": 32 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "teacherUid": { "type": "string", "maxLength": 128 },
+        "teacherName": { "type": "string", "maxLength": 120 },
+        "academicSessionId": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["classCode", "name", "section", "createdAt"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "Subject assigned to a class.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "maxLength": 32 },
+        "name": { "type": "string", "maxLength": 80 },
+        "classId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "teacherUid": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["code", "name", "classId", "createdAt"]
+    },
+    "Teacher": {
+      "title": "Teacher",
+      "description": "Faculty profile without phone/email PII.",
+      "type": "object",
+      "properties": {
+        "teacherCode": { "type": "string", "maxLength": 40 },
+        "uid": { "type": "string", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 120 },
+        "subjectSpecialty": { "type": "string", "maxLength": 120 },
+        "qualification": { "type": "string", "maxLength": 120 },
+        "joiningDate": { "type": "string", "maxLength": 24 },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "assignedClassId": { "type": "string", "maxLength": 128 },
+        "assignedClassName": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["teacherCode", "fullName", "status", "createdAt"]
+    },
+    "TeacherPrivate": {
+      "title": "TeacherPrivate",
+      "description": "Isolated faculty contact PII.",
+      "type": "object",
+      "properties": {
+        "teacherId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "maxLength": 160 },
+        "phone": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["teacherId"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Student record with immutable studentCode and role-linked UIDs.",
+      "type": "object",
+      "properties": {
+        "studentCode": { "type": "string", "maxLength": 40 },
+        "fullName": { "type": "string", "maxLength": 120 },
+        "fatherName": { "type": "string", "maxLength": 120 },
+        "photoUrl": { "type": "string", "maxLength": 50000 },
+        "dob": { "type": "string", "maxLength": 24 },
+        "gender": { "type": "string", "enum": ["Male", "Female"] },
+        "classId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "className": { "type": "string", "maxLength": 64 },
+        "section": { "type": "string", "maxLength": 16 },
+        "rollNumber": { "type": "string", "maxLength": 24 },
+        "teacherUid": { "type": "string", "maxLength": 128 },
+        "studentUid": { "type": "string", "maxLength": 128 },
+        "parentUid": { "type": "string", "maxLength": 128 },
+        "parentName": { "type": "string", "maxLength": 120 },
+        "admissionDate": { "type": "string", "maxLength": 24 },
+        "status": { "type": "string", "enum": ["active", "archived"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentCode", "fullName", "fatherName", "classId", "rollNumber", "status", "createdAt"]
+    },
+    "StudentPrivate": {
+      "title": "StudentPrivate",
+      "description": "Isolated student and guardian contact PII.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "parentMobile": { "type": "string", "maxLength": 40 },
+        "studentEmail": { "type": "string", "maxLength": 160 },
+        "parentEmail": { "type": "string", "maxLength": 160 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "parentMobile"]
+    },
+    "AttendanceSubmission": {
+      "title": "AttendanceSubmission",
+      "description": "Immutable daily class attendance submission lock record.",
+      "type": "object",
+      "properties": {
+        "classId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "maxLength": 16 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "teacherUid": { "type": "string", "maxLength": 128 },
+        "pktTimeStr": { "type": "string", "maxLength": 24 },
+        "totalStudents": { "type": "number" },
+        "presentCount": { "type": "number" },
+        "absentCount": { "type": "number" },
+        "lateCount": { "type": "number" },
+        "leaveCount": { "type": "number" },
+        "isLocked": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["classId", "date", "teacherUid", "isLocked", "createdAt"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Daily student attendance record.",
+      "type": "object",
+      "properties": {
+        "submissionId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studentId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studentCode": { "type": "string", "maxLength": 40 },
+        "studentName": { "type": "string", "maxLength": 120 },
+        "rollNumber": { "type": "string", "maxLength": 24 },
+        "classId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "className": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 16 },
+        "status": { "type": "string", "enum": ["Present", "Absent", "Late", "Leave"] },
+        "teacherUid": { "type": "string", "maxLength": 128 },
+        "studentUid": { "type": "string", "maxLength": 128 },
+        "parentUid": { "type": "string", "maxLength": 128 },
+        "markedByUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "markedAt": { "type": "string", "maxLength": 32 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["submissionId", "studentId", "classId", "date", "status", "markedByUid", "createdAt"]
+    },
+    "TeacherAttendance": {
+      "title": "TeacherAttendance",
+      "description": "Daily faculty attendance marked by Principal.",
+      "type": "object",
+      "properties": {
+        "teacherId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "teacherUid": { "type": "string", "maxLength": 128 },
+        "teacherCode": { "type": "string", "maxLength": 40 },
+        "fullName": { "type": "string", "maxLength": 120 },
+        "date": { "type": "string", "maxLength": 16 },
+        "status": { "type": "string", "enum": ["Present", "Absent", "Late", "Leave"] },
+        "checkInTime": { "type": "string", "maxLength": 24 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["teacherId", "date", "status", "createdAt"]
+    },
+    "CorrectionRequest": {
+      "title": "CorrectionRequest",
+      "description": "Teacher-submitted attendance correction request requiring Principal approval.",
+      "type": "object",
+      "properties": {
+        "attendanceId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "studentName": { "type": "string", "maxLength": 120 },
+        "studentCode": { "type": "string", "maxLength": 40 },
+        "classId": { "type": "string", "maxLength": 128 },
+        "className": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 16 },
+        "requestedByTeacherUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "teacherName": { "type": "string", "maxLength": 120 },
+        "oldStatus": { "type": "string", "enum": ["Present", "Absent", "Late", "Leave"] },
+        "requestedStatus": { "type": "string", "enum": ["Present", "Absent", "Late", "Leave"] },
+        "reason": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "reviewedByUid": { "type": "string", "maxLength": 128 },
+        "reviewedAt": { "type": "string", "maxLength": 32 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["attendanceId", "requestedByTeacherUid", "oldStatus", "requestedStatus", "reason", "status", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Append-only immutable audit log entry.",
+      "type": "object",
+      "properties": {
+        "actorUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "actorName": { "type": "string", "maxLength": 120 },
+        "actorRole": { "type": "string", "maxLength": 32 },
+        "actionType": { "type": "string", "maxLength": 80 },
+        "targetTable": { "type": "string", "maxLength": 64 },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "oldValue": { "type": "string", "maxLength": 1000 },
+        "newValue": { "type": "string", "maxLength": 1000 },
+        "reason": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["actorUid", "actorName", "actorRole", "actionType", "targetTable", "targetId", "createdAt"]
+    },
+    "Homework": {
+      "title": "Homework",
+      "description": "Class homework assignment.",
+      "type": "object",
+      "properties": {
+        "classId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "teacherUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "subject": { "type": "string", "maxLength": 80 },
+        "title": { "type": "string", "maxLength": 160 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "assignedDate": { "type": "string", "maxLength": 24 },
+        "dueDate": { "type": "string", "maxLength": 24 },
+        "attachmentUrl": { "type": "string", "maxLength": 250000 },
+        "attachmentName": { "type": "string", "maxLength": 160 },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "viewerUids": { "type": "array" },
+        "publishedAt": { "type": "string", "maxLength": 32 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["classId", "teacherUid", "subject", "title", "description", "dueDate", "status", "createdAt"]
+    },
+    "TestRecord": {
+      "title": "TestRecord",
+      "description": "Scheduled class test or exam.",
+      "type": "object",
+      "properties": {
+        "classId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "teacherUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "maxLength": 160 },
+        "subject": { "type": "string", "maxLength": 80 },
+        "testType": { "type": "string", "maxLength": 40 },
+        "testDate": { "type": "string", "maxLength": 24 },
+        "totalMarks": { "type": "number" },
+        "syllabus": { "type": "string", "maxLength": 1000 },
+        "instructions": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "viewerUids": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["classId", "teacherUid", "title", "subject", "testDate", "totalMarks", "status", "createdAt"]
+    },
+    "TestResult": {
+      "title": "TestResult",
+      "description": "Graded student test score.",
+      "type": "object",
+      "properties": {
+        "testId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "testTitle": { "type": "string", "maxLength": 160 },
+        "subject": { "type": "string", "maxLength": 80 },
+        "testType": { "type": "string", "maxLength": 40 },
+        "testDate": { "type": "string", "maxLength": 24 },
+        "studentId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studentName": { "type": "string", "maxLength": 120 },
+        "classId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "teacherUid": { "type": "string", "maxLength": 128 },
+        "studentUid": { "type": "string", "maxLength": 128 },
+        "parentUid": { "type": "string", "maxLength": 128 },
+        "obtainedMarks": { "type": "number" },
+        "totalMarks": { "type": "number" },
+        "percentage": { "type": "number" },
+        "grade": { "type": "string", "maxLength": 8 },
+        "remarks": { "type": "string", "maxLength": 300 },
+        "recordedByUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["testId", "studentId", "classId", "obtainedMarks", "totalMarks", "percentage", "grade", "recordedByUid", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Real-time user notification.",
+      "type": "object",
+      "properties": {
+        "recipientUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "senderUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "type": { "type": "string", "maxLength": 48 },
+        "title": { "type": "string", "maxLength": 160 },
+        "message": { "type": "string", "maxLength": 1000 },
+        "linkTab": { "type": "string", "maxLength": 48 },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["recipientUid", "senderUid", "type", "title", "message", "isRead", "createdAt"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Academy-wide or role-targeted announcement.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 160 },
+        "content": { "type": "string", "maxLength": 2000 },
+        "targetRole": { "type": "string", "enum": ["all", "teacher", "student", "parent"] },
+        "priority": { "type": "string", "enum": ["normal", "important", "urgent"] },
+        "createdByUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "viewerUids": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "targetRole", "priority", "createdByUid", "createdAt"]
+    },
+    "Holiday": {
+      "title": "Holiday",
+      "description": "School holiday calendar entry.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "maxLength": 24 },
+        "title": { "type": "string", "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 400 },
+        "viewerUids": { "type": "array" },
+        "createdByUid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "title", "createdByUid", "createdAt"]
+    },
+    "TimetableSlot": {
+      "title": "TimetableSlot",
+      "description": "Class weekly period schedule.",
+      "type": "object",
+      "properties": {
+        "classId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "className": { "type": "string", "maxLength": 64 },
+        "dayOfWeek": { "type": "string", "maxLength": 24 },
+        "periodNumber": { "type": "number" },
+        "startTime": { "type": "string", "maxLength": 16 },
+        "endTime": { "type": "string", "maxLength": 16 },
+        "subject": { "type": "string", "maxLength": 80 },
+        "teacherUid": { "type": "string", "maxLength": 128 },
+        "teacherName": { "type": "string", "maxLength": 120 },
+        "viewerUids": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["classId", "dayOfWeek", "periodNumber", "startTime", "endTime", "subject", "createdAt"]
+    },
+    "FeeRecord": {
+      "title": "FeeRecord",
+      "description": "Monthly student tuition fee ledger entry.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studentName": { "type": "string", "maxLength": 120 },
+        "studentCode": { "type": "string", "maxLength": 40 },
+        "className": { "type": "string", "maxLength": 64 },
+        "studentUid": { "type": "string", "maxLength": 128 },
+        "parentUid": { "type": "string", "maxLength": 128 },
+        "month": { "type": "string", "maxLength": 24 },
+        "year": { "type": "number" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Paid"] },
+        "paidAt": { "type": "string", "maxLength": 24 },
+        "receiptNo": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "month", "year", "amount", "status", "createdAt"]
+    },
+    "AcademicSession": {
+      "title": "AcademicSession",
+      "description": "School academic year session.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 40 },
+        "startDate": { "type": "string", "maxLength": 24 },
+        "endDate": { "type": "string", "maxLength": 24 },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "startDate", "endDate", "isActive", "createdAt"]
+    },
+    "AcademySetting": {
+      "title": "AcademySetting",
+      "description": "Academy-wide configuration and attendance policy.",
+      "type": "object",
+      "properties": {
+        "academyName": { "type": "string", "maxLength": 120 },
+        "campusAddress": { "type": "string", "maxLength": 200 },
+        "attendanceStartPkt": { "type": "string", "maxLength": 10 },
+        "attendanceEndPkt": { "type": "string", "maxLength": 10 },
+        "lateCountsAsPresent": { "type": "boolean" },
+        "leaveExcludedFromDenominator": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["academyName", "attendanceStartPkt", "attendanceEndPkt"]
+    }
+  },
+  "firestore": {
+    "/admins/{uid}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Registry of Principal administrator UIDs."
+    },
+    "/user_profiles/{uid}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Non-PII user role bindings and preferences."
+    },
+    "/user_private/{uid}": {
+      "schema": { "$ref": "#/entities/UserPrivate" },
+      "description": "Owner/Admin-only private contact details."
+    },
+    "/email_invites/{inviteId}": {
+      "schema": { "$ref": "#/entities/EmailRoleInvite" },
+      "description": "Principal-issued email-to-role bindings for Google login."
+    },
+    "/classes/{classId}": {
+      "schema": { "$ref": "#/entities/AcademicClass" },
+      "description": "Academy classes and teacher assignments."
+    },
+    "/subjects/{subjectId}": {
+      "schema": { "$ref": "#/entities/Subject" },
+      "description": "Class subject catalog."
+    },
+    "/teachers/{teacherId}": {
+      "schema": { "$ref": "#/entities/Teacher" },
+      "description": "Faculty operational records."
+    },
+    "/teachers/{teacherId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/TeacherPrivate" },
+      "description": "Faculty PII (email and phone)."
+    },
+    "/students/{studentId}": {
+      "schema": { "$ref": "#/entities/Student" },
+      "description": "Student academic records with immutable studentCode."
+    },
+    "/students/{studentId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/StudentPrivate" },
+      "description": "Student and parent contact PII."
+    },
+    "/attendance_submissions/{submissionId}": {
+      "schema": { "$ref": "#/entities/AttendanceSubmission" },
+      "description": "Immutable daily class attendance lock receipts."
+    },
+    "/attendance/{attendanceId}": {
+      "schema": { "$ref": "#/entities/AttendanceRecord" },
+      "description": "Daily attendance records locked against teacher edits."
+    },
+    "/teacher_attendance/{recordId}": {
+      "schema": { "$ref": "#/entities/TeacherAttendance" },
+      "description": "Daily faculty attendance records."
+    },
+    "/correction_requests/{requestId}": {
+      "schema": { "$ref": "#/entities/CorrectionRequest" },
+      "description": "Teacher attendance correction requests reviewed by Principal."
+    },
+    "/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Immutable school audit log."
+    },
+    "/homework/{homeworkId}": {
+      "schema": { "$ref": "#/entities/Homework" },
+      "description": "Class homework assignments."
+    },
+    "/tests/{testId}": {
+      "schema": { "$ref": "#/entities/TestRecord" },
+      "description": "Scheduled tests and exams."
+    },
+    "/test_results/{resultId}": {
+      "schema": { "$ref": "#/entities/TestResult" },
+      "description": "Graded student test marks."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Real-time user notifications."
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "#/entities/Announcement" },
+      "description": "School-wide announcements."
+    },
+    "/holidays/{holidayId}": {
+      "schema": { "$ref": "#/entities/Holiday" },
+      "description": "Academic calendar holidays."
+    },
+    "/timetable/{slotId}": {
+      "schema": { "$ref": "#/entities/TimetableSlot" },
+      "description": "Weekly class timetable slots."
+    },
+    "/fees/{feeId}": {
+      "schema": { "$ref": "#/entities/FeeRecord" },
+      "description": "Student fee ledger entries."
+    },
+    "/sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/AcademicSession" },
+      "description": "Academic year sessions."
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/AcademySetting" },
+      "description": "Academy global configuration."
+    }
+  }
+}

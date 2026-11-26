@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import WelcomePage from './components/WelcomePage';
-import { apiFetch, getAuthToken, isStaticMode, setAuthToken } from './lib/api';
+import { apiFetch, detectBackendMode, getAuthToken, isFirebaseMode, isStaticMode, setAuthToken, setBackendMode } from './lib/api';
+import { auth } from './lib/firebase';
+import { subscribeFirebaseEvents } from './lib/firebaseBackend';
 import { subscribeStaticEvents } from './lib/staticBackend';
 import { playNotificationChime, triggerBrowserPushNotification } from './lib/sound';
 import type { NotificationItem, PktTimeInfo, SessionUser } from './types';
@@ -39,11 +41,17 @@ export default function App() {
     }
   }, []);
 
-  // Restore session cookie & fetch server PKT time
+  // Restore session (Node cookie or Firebase Auth) & fetch server PKT time
   useEffect(() => {
     let cancelled = false;
     async function init() {
       try {
+        await auth.authStateReady().catch(() => undefined);
+        if (auth.currentUser) {
+          setBackendMode('firebase');
+        } else {
+          await detectBackendMode();
+        }
         const health = await apiFetch<{ pkt: PktTimeInfo }>('/api/health');
         if (!cancelled && health?.pkt) setPkt(health.pkt);
 
@@ -108,6 +116,9 @@ export default function App() {
       }
     };
 
+    if (isFirebaseMode()) {
+      return subscribeFirebaseEvents(handleRealtimeMessage);
+    }
     if (isStaticMode()) {
       return subscribeStaticEvents(handleRealtimeMessage);
     }
